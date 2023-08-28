@@ -18,21 +18,34 @@ class MessageSenderImplTest {
     @Test
     void send_should_be_russian() {
 
-        Location location = Mockito.mock(Location.class);
-        Mockito.when(location.getCountry()).thenReturn(Country.RUSSIA);
-
         GeoServiceImpl geoService = Mockito.mock(GeoServiceImpl.class);
-        Mockito.when(geoService.byIp("")).thenReturn(new Location(null, Country.RUSSIA, null, 0));
+        Mockito.when(geoService.byIp(Mockito.startsWith("172."))).thenReturn(new Location("", Country.RUSSIA, null, 0));
 
         LocalizationServiceImpl localizationService = Mockito.mock(LocalizationServiceImpl.class);
-        Mockito.when(localizationService.locale(Country.RUSSIA)).thenReturn("It's russian language");
-
+        Mockito.when(localizationService.locale(Country.RUSSIA)).thenReturn("It's russian");
 
         MessageSenderImpl messageSender = new MessageSenderImpl(geoService, localizationService);
 
         Map<String, String> map = new HashMap<>();
-        map.put("IP_ADDRESS_HEADER", "");
+        map.put(MessageSenderImpl.IP_ADDRESS_HEADER, "172.16.16.16");
 
-        Assertions.assertEquals("It's russian language", messageSender.send(map));
+        Assertions.assertEquals("It's russian", messageSender.send(map));
+    }
+
+    @Test
+    void send_should_be_english() {
+
+        GeoServiceImpl geoService = Mockito.mock(GeoServiceImpl.class);
+        Mockito.when(geoService.byIp(Mockito.startsWith("96."))).thenReturn(new Location("", Country.USA, null, 0));
+
+        LocalizationServiceImpl localizationService = Mockito.mock(LocalizationServiceImpl.class);
+        Mockito.when(localizationService.locale(Country.USA)).thenReturn("It's english");
+
+        MessageSenderImpl messageSender = new MessageSenderImpl(geoService, localizationService);
+
+        Map<String, String> map = new HashMap<>();
+        map.put(MessageSenderImpl.IP_ADDRESS_HEADER, "96.16.16.16");
+
+        Assertions.assertEquals("It's english", messageSender.send(map));
     }
 }
